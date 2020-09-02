@@ -1,0 +1,46 @@
+version: '3.1'
+
+services:
+  graphql-example-postgres:
+    restart: unless-stopped
+    container_name: graphql-example-postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: POSTGRES_DB
+      POSTGRES_USER: POSTGRES_USER
+      POSTGRES_PASSWORD: POSTGRES_PASSWORD
+
+  graphql-example-minio:
+    restart: unless-stopped
+    container_name: graphql-example-minio
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./minio:/data
+    environment:
+      MINIO_ACCESS_KEY: MINIO_ACCESS_KEY
+      MINIO_SECRET_KEY: MINIO_SECRET_KEY
+    entrypoint: sh
+    command: -c 'mkdir -p /data/uploads && /usr/bin/minio server /data'
+
+  graphql-example-uploads:
+    restart: unless-stopped
+    container_name: graphql-example-uploads
+    image: nginx:stable
+    ports:
+      - "3050:80"
+    volumes:
+      - ./minio/uploads:/usr/share/nginx/html
+
+#  graphql-example-api:
+#    restart: unless-stopped
+#    build: .
+#    container_name: graphql-example-api
+#    image: graphql-example-api
+#    ports:
+#      - "3040:3020"
+#    environment:
+#      PORT: 3020
